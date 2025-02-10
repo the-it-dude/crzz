@@ -31,6 +31,11 @@ config :crzz, CrzzWeb.Endpoint,
     tailwind: {Tailwind, :install_and_run, [:crzz, ~w(--watch)]}
   ]
 
+
+config :cors_plug,
+  origin: ["http://localhost", "http://localhost:8100"],
+  max_age: 86400,
+  methods: ["GET", "POST", "PUT"]
 # ## SSL Support
 #
 # In order to use HTTPS in development, a self-signed

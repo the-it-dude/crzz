@@ -60,7 +60,8 @@ defmodule Crzz.MixProject do
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
       {:geo, "~> 4.0.0"},
-      {:geo_postgis, "~> 3.7.1"}
+      {:geo_postgis, "~> 3.7.1"},
+      {:cors_plug, "~> 3.0"}
     ]
   end
 
