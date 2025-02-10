@@ -269,4 +269,21 @@ defmodule CrzzWeb.UserAuthTest do
       refute conn.status
     end
   end
+
+  describe "require_authenticated_api_user/2" do
+    test "returns json if user is not authenticated", %{conn: conn} do
+      conn = conn |> fetch_flash() |> UserAuth.require_authenticated_api_user([])
+      assert conn.halted
+
+      assert conn.status == 400
+
+      assert json_response(conn, 400) == %{"error" => "Unauthorized."}
+    end
+
+    test "does not return error if user is authenticated", %{conn: conn, user: user} do
+      conn = conn |> assign(:current_user, user) |> UserAuth.require_authenticated_api_user([])
+      refute conn.halted
+      refute conn.status
+    end
+  end
 end

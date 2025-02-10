@@ -213,6 +213,19 @@ defmodule CrzzWeb.UserAuth do
     end
   end
 
+  def require_authenticated_api_user(conn, _opts) do
+    if conn.assigns[:current_user] do
+      conn
+    else
+      conn
+      |> put_resp_content_type("application/json")
+      |> send_resp(400, Jason.encode!(
+            %{"error" => "Unauthorized."}
+          ))
+      |> halt()
+    end
+  end
+
   defp put_token_in_session(conn, token) do
     conn
     |> put_session(:user_token, token)

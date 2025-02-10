@@ -24,9 +24,11 @@ defmodule CrzzWeb.Router do
   end
 
   # Other scopes may use custom stacks.
-  # scope "/api", CrzzWeb do
-  #   pipe_through :api
-  # end
+  scope "/api", CrzzWeb do
+    pipe_through [:api, :require_authenticated_api_user]
+
+    resources "/events", EventController, except: [:new, :edit]
+  end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:crzz, :dev_routes) do

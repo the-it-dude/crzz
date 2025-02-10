@@ -11,6 +11,9 @@ config :crzz,
   ecto_repos: [Crzz.Repo],
   generators: [timestamp_type: :utc_datetime, binary_id: true]
 
+config :crzz, Crzz.Repo,
+  types: Crzz.PostgresTypes
+
 # Configures the endpoint
 config :crzz, CrzzWeb.Endpoint,
   url: [host: "localhost"],
