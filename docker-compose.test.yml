@@ -1,0 +1,27 @@
+services:
+   crzz:
+      build:
+         context: .
+      environment:
+         PGUSER: crzz_test
+         PGPASSWORD: crzz_test
+         PGDATABASE: crzz_test
+         PGPORT: 5432
+         PGHOST: db
+         MIX_ENV: test
+      ports:
+         - '4000:4000'
+      volumes:
+        - ./lib:/app/lib
+        - ./priv:/app/priv
+        - ./test:/app/test
+
+      command: bash -c "while sleep 1000; do :; done"
+      depends_on:
+         - db
+   db:
+      image: postgis/postgis:17-3.5
+      environment:
+         POSTGRES_USER: crzz_test
+         POSTGRES_PASSWORD: crzz_test
+      restart: always
