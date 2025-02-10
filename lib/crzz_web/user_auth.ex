@@ -213,16 +213,18 @@ defmodule CrzzWeb.UserAuth do
     end
   end
 
-  def require_authenticated_api_user(conn, _opts) do
-    if conn.assigns[:current_user] do
-      conn
+  def fetch_api_user(conn, _opts) do
+    with ["Bearer " <> token] <- get_req_header(conn, "authorization"),
+         {:ok, user} <- Accounts.fetch_user_by_api_token(token) do
+      assign(conn, :current_user, user)
     else
-      conn
-      |> put_resp_content_type("application/json")
-      |> send_resp(400, Jason.encode!(
+      _ ->
+        conn
+        |> put_resp_content_type("application/json")
+        |> send_resp(:unauthorized, Jason.encode!(
             %{"error" => "Unauthorized."}
           ))
-      |> halt()
+        |> halt()
     end
   end
 

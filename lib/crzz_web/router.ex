@@ -23,9 +23,14 @@ defmodule CrzzWeb.Router do
     get "/", PageController, :home
   end
 
-  # Other scopes may use custom stacks.
   scope "/api", CrzzWeb do
-    pipe_through [:api, :require_authenticated_api_user]
+    pipe_through [:api]
+
+    post "/token", UserSessionAPIController, :create
+  end
+
+  scope "/api", CrzzWeb do
+    pipe_through [:api, :fetch_api_user]
 
     resources "/events", EventController, except: [:new, :edit]
   end

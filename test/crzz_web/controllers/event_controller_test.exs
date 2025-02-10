@@ -1,6 +1,7 @@
 defmodule CrzzWeb.EventControllerTest do
   use CrzzWeb.ConnCase, async: true
 
+  alias Crzz.Accounts
   alias Crzz.Events.Event
 
   import Crzz.AccountsFixtures
@@ -30,8 +31,8 @@ defmodule CrzzWeb.EventControllerTest do
     conn = conn
       |> Map.replace!(:secret_key_base, CrzzWeb.Endpoint.config(:secret_key_base))
       |> init_test_session(%{})
+      |> put_req_header("authorization","Bearer " <> Accounts.create_user_api_token(user_fixture()))
       |> put_req_header("accept", "application/json")
-      |> assign(:current_user, user_fixture())
 
     {:ok, conn: conn}
   end
@@ -49,9 +50,6 @@ defmodule CrzzWeb.EventControllerTest do
       conn = post(conn, ~p"/api/events", event: @create_attrs)
       assert %{"id" => id} = json_response(conn, 201)["data"]
 
-      conn = conn
-        |> recycle()
-        |> assign(:current_user, user_fixture())
       conn = get(conn, ~p"/api/events/#{id}")
 
       assert %{
@@ -76,7 +74,6 @@ defmodule CrzzWeb.EventControllerTest do
     setup [:create_event]
 
     test "renders event when data is valid", %{conn: conn, event: %Event{id: id} = event} do
-      conn = conn |> assign(:current_user, user_fixture())
       conn = put(conn, ~p"/api/events/#{event}", event: @update_attrs)
       assert %{"id" => ^id} = json_response(conn, 200)["data"]
 
