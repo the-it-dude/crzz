@@ -5,7 +5,7 @@ defmodule Crzz.Events.Event do
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
   schema "events" do
-    field :status, Ecto.Enum, values: [:draft, :published, :deleted]
+    field :status, Ecto.Enum, values: [:draft, :published, :private, :deleted]
     field :type, Ecto.Enum, values: [:cars_and_coffee, :meeting, :drive, :other]
     field :description, :string
     field :title, :string

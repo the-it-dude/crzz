@@ -3,12 +3,13 @@ services:
       build:
          context: .
       environment:
-         PGUSER: crzz_test
-         PGPASSWORD: crzz_test
+         PGUSER: crzz
+         PGPASSWORD: crzz
          PGDATABASE: crzz_test
          PGPORT: 5432
          PGHOST: db
          MIX_ENV: test
+         DATABASE_HOST: db
       ports:
          - '4000:4000'
       volumes:
@@ -22,6 +23,6 @@ services:
    db:
       image: postgis/postgis:17-3.5
       environment:
-         POSTGRES_USER: crzz_test
-         POSTGRES_PASSWORD: crzz_test
+         POSTGRES_USER: crzz
+         POSTGRES_PASSWORD: crzz
       restart: always

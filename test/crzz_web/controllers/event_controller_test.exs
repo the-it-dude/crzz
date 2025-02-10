@@ -17,7 +17,7 @@ defmodule CrzzWeb.EventControllerTest do
     start_time: ~T[14:00:00]
   }
   @update_attrs %{
-    status: :published,
+    status: :private,
     type: :meeting,
     description: "some updated description",
     title: "some updated title",
@@ -88,7 +88,7 @@ defmodule CrzzWeb.EventControllerTest do
                "end_date" => "2025-02-10",
                "start_date" => "2025-02-10",
                "start_time" => "15:01:01",
-               "status" => "published",
+               "status" => "private",
                "title" => "some updated title",
                "type" => "meeting"
              } = json_response(conn, 200)["data"]
