@@ -24,7 +24,7 @@ defmodule CrzzWeb.Router do
   end
 
   scope "/api", CrzzWeb do
-    pipe_through [:api]
+    pipe_through :api
 
     post "/token", UserSessionAPIController, :create
   end
