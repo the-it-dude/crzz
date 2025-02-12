@@ -33,7 +33,7 @@ config :crzz, CrzzWeb.Endpoint,
 
 
 config :cors_plug,
-  origin: ["http://localhost", "http://localhost:8100"],
+  origin: ["http://localhost", "http://localhost:8100", "https://0e42-85-242-246-168.ngrok-free.app"],
   max_age: 86400,
   methods: ["GET", "POST", "PUT"]
 # ## SSL Support

@@ -22,6 +22,13 @@ defmodule Crzz.Events do
   end
 
   @doc """
+  List upcoming published events.
+  """
+  def list_upcoming_public_events do
+    Repo.all(Event.upcoming_public_events_query(Date.utc_today()))
+  end
+
+  @doc """
   Gets a single event.
 
   Raises `Ecto.NoResultsError` if the Event does not exist.

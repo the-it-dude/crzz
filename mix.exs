@@ -61,7 +61,8 @@ defmodule Crzz.MixProject do
       {:bandit, "~> 1.5"},
       {:geo, "~> 4.0.0"},
       {:geo_postgis, "~> 3.7.1"},
-      {:cors_plug, "~> 3.0"}
+      {:cors_plug, "~> 3.0"},
+      {:timex, "~> 3.7.1"}
     ]
   end
 

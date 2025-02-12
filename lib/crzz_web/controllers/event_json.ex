@@ -24,7 +24,9 @@ defmodule CrzzWeb.EventJSON do
       description: event.description,
       start_date: event.start_date,
       end_date: event.end_date,
-      start_time: event.start_time
+      start_time: event.start_time,
+      location: event.location,
+      location_name: event.location_name,
     }
   end
 end

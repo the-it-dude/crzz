@@ -7,7 +7,7 @@ defmodule CrzzWeb.EventController do
   action_fallback CrzzWeb.FallbackController
 
   def index(conn, _params) do
-    events = Events.list_events()
+    events = Events.list_upcoming_public_events()
     render(conn, :index, events: events)
   end
 
