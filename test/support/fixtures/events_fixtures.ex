@@ -4,6 +4,8 @@ defmodule Crzz.EventsFixtures do
   entities via the `Crzz.Events` context.
   """
 
+  import Crzz.AccountsFixtures
+
   @doc """
   Generate a event.
   """
@@ -23,5 +25,22 @@ defmodule Crzz.EventsFixtures do
       |> Crzz.Events.create_event()
 
     event
+  end
+
+  @doc """
+  Generate a event_users.
+  """
+  def event_users_fixture(attrs \\ %{}) do
+    role = Map.get(attrs, :role, :owner)
+    event = Map.get(attrs, :event, event_fixture())
+    user = Map.get(attrs, :user, user_fixture())
+
+    {:ok, event_users} = Crzz.Events.create_event_users(%{
+      role: role,
+      event_id: event.id,
+      user_id: user.id,
+    })
+
+    event_users
   end
 end

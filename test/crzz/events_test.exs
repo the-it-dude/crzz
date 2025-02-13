@@ -78,4 +78,68 @@ defmodule Crzz.EventsTest do
       assert %Ecto.Changeset{} = Events.change_event(event)
     end
   end
+
+  describe "event_users" do
+    alias Crzz.Events.EventUsers
+
+    import Crzz.AccountsFixtures
+    import Crzz.EventsFixtures
+
+    @invalid_attrs %{role: nil}
+
+    test "list_event_users/0 returns all event_users" do
+      event_users = event_users_fixture()
+      [event_user] = Events.list_event_users()
+
+      assert event_user.role == :owner
+      assert event_user.user_id == event_users.user_id
+      assert event_user.event_id == event_users.event_id
+    end
+
+    # test "get_event_users!/1 returns the event_users with given id" do
+    #   event_users = event_users_fixture()
+    #   assert Events.get_event_users!(event_users.id) == event_users
+    # end
+
+    test "create_event_users/1 with valid data creates a event_users" do
+      user = user_fixture()
+      event = event_fixture()
+
+      valid_attrs = %{role: :owner, user_id: user.id, event_id: event.id}
+
+      assert {:ok, %EventUsers{} = event_users} = Events.create_event_users(valid_attrs)
+      assert event_users.role == :owner
+      assert event_users.user_id == user.id
+      assert event_users.event_id == event.id
+    end
+
+    test "create_event_users/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Events.create_event_users(@invalid_attrs)
+    end
+
+    # test "update_event_users/2 with valid data updates the event_users" do
+    #   event_users = event_users_fixture()
+    #   update_attrs = %{role: :manager}
+    #
+    #   assert {:ok, %EventUsers{} = event_users} = Events.update_event_users(event_users, update_attrs)
+    #   assert event_users.role == :manager
+    # end
+
+    # test "update_event_users/2 with invalid data returns error changeset" do
+    #   event_users = event_users_fixture()
+    #   assert {:error, %Ecto.Changeset{}} = Events.update_event_users(event_users, @invalid_attrs)
+    #   assert event_users == Events.get_event_users!(event_users.id)
+    # end
+    #
+    # test "delete_event_users/1 deletes the event_users" do
+    #   event_users = event_users_fixture()
+    #   assert {:ok, %EventUsers{}} = Events.delete_event_users(event_users)
+    #   assert_raise Ecto.NoResultsError, fn -> Events.get_event_users!(event_users.id) end
+    # end
+
+    test "change_event_users/1 returns a event_users changeset" do
+      event_users = event_users_fixture()
+      assert %Ecto.Changeset{} = Events.change_event_users(event_users)
+    end
+  end
 end

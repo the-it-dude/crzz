@@ -33,6 +33,7 @@ defmodule CrzzWeb.Router do
     pipe_through [:api, :fetch_api_user]
 
     resources "/events", EventController, except: [:new, :edit]
+    resources "/event_users", EventUsersController, except: [:new, :edit]
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development

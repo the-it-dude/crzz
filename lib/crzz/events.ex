@@ -3,7 +3,7 @@ defmodule Crzz.Events do
   The Events context.
   """
 
-  import Ecto.Query, warn: false
+  import Ecto.Query
   alias Crzz.Repo
 
   alias Crzz.Events.Event
@@ -107,5 +107,106 @@ defmodule Crzz.Events do
   """
   def change_event(%Event{} = event, attrs \\ %{}) do
     Event.changeset(event, attrs)
+  end
+
+  alias Crzz.Events.EventUsers
+
+  @doc """
+  Returns the list of event_users.
+
+  ## Examples
+
+      iex> list_event_users()
+      [%EventUsers{}, ...]
+
+  """
+  def list_event_users do
+    Repo.all(EventUsers)
+    |> Repo.preload(:user)
+    |> Repo.preload(:event)
+  end
+
+  @doc """
+  Gets a single event_users.
+
+  Raises `Ecto.NoResultsError` if the Event users does not exist.
+
+  ## Examples
+
+      iex> get_event_users!(1, 2)
+      %EventUsers{}
+
+      iex> get_event_users!(456, 33)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_event_users!(event_id, user_id), do: Repo.one!(
+        from eu in EventUsers,
+        where: eu.event == ^event_id and eu.user == ^user_id
+      )
+
+  @doc """
+  Creates a event_users.
+
+  ## Examples
+
+      iex> create_event_users(%{field: value})
+      {:ok, %EventUsers{}}
+
+      iex> create_event_users(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_event_users(attrs \\ %{}) do
+    %EventUsers{}
+    |> EventUsers.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a event_users.
+
+  ## Examples
+
+      iex> update_event_users(event_users, %{field: new_value})
+      {:ok, %EventUsers{}}
+
+      iex> update_event_users(event_users, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_event_users(%EventUsers{} = event_users, attrs) do
+    event_users
+    |> EventUsers.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a event_users.
+
+  ## Examples
+
+      iex> delete_event_users(event_users)
+      {:ok, %EventUsers{}}
+
+      iex> delete_event_users(event_users)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_event_users(%EventUsers{} = event_users) do
+    Repo.delete(event_users)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking event_users changes.
+
+  ## Examples
+
+      iex> change_event_users(event_users)
+      %Ecto.Changeset{data: %EventUsers{}}
+
+  """
+  def change_event_users(%EventUsers{} = event_users, attrs \\ %{}) do
+    EventUsers.changeset(event_users, attrs)
   end
 end
