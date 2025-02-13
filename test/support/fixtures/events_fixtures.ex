@@ -17,7 +17,8 @@ defmodule Crzz.EventsFixtures do
         start_time: ~T[14:00:00],
         status: :draft,
         title: "some title",
-        type: :cars_and_coffee
+        type: :cars_and_coffee,
+        location_name: "Los Alamos",
       })
       |> Crzz.Events.create_event()
 

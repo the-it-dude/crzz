@@ -14,7 +14,8 @@ defmodule CrzzWeb.EventControllerTest do
     title: "some title",
     start_date: ~D[2025-02-09],
     end_date: ~D[2025-02-09],
-    start_time: ~T[14:00:00]
+    start_time: ~T[14:00:00],
+    location_name: "Los Alamos",
   }
   @update_attrs %{
     status: :private,
@@ -23,18 +24,20 @@ defmodule CrzzWeb.EventControllerTest do
     title: "some updated title",
     start_date: ~D[2025-02-10],
     end_date: ~D[2025-02-10],
-    start_time: ~T[15:01:01]
+    start_time: ~T[15:01:01],
+    location_name: "Market Square, Lviv"
   }
   @invalid_attrs %{status: nil, type: nil, description: nil, title: nil, start_date: nil, end_date: nil, start_time: nil}
 
   setup %{conn: conn} do
+    user = user_fixture()
     conn = conn
       |> Map.replace!(:secret_key_base, CrzzWeb.Endpoint.config(:secret_key_base))
       |> init_test_session(%{})
-      |> put_req_header("authorization","Bearer " <> Accounts.create_user_api_token(user_fixture()))
+      |> put_req_header("authorization","Bearer " <> Accounts.create_user_api_token(user))
       |> put_req_header("accept", "application/json")
 
-    {:ok, conn: conn}
+    {:ok, conn: conn, user: user}
   end
 
   describe "index" do
@@ -62,6 +65,9 @@ defmodule CrzzWeb.EventControllerTest do
                "title" => "some title",
                "type" => "cars_and_coffee"
              } = json_response(conn, 200)["data"]
+
+
+
     end
 
     test "renders errors when data is invalid", %{conn: conn} do

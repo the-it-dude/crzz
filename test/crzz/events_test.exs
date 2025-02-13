@@ -21,7 +21,16 @@ defmodule Crzz.EventsTest do
     end
 
     test "create_event/1 with valid data creates a event" do
-      valid_attrs = %{status: :draft, type: :cars_and_coffee, description: "some description", title: "some title", start_date: ~D[2025-02-09], end_date: ~D[2025-02-09], start_time: ~T[14:00:00]}
+      valid_attrs = %{
+        status: :draft,
+        type: :cars_and_coffee,
+        description: "some description",
+        title: "some title",
+        start_date: ~D[2025-02-09],
+        end_date: ~D[2025-02-09],
+        start_time: ~T[14:00:00],
+        location_name: "Gulf of America",
+      }
 
       assert {:ok, %Event{} = event} = Events.create_event(valid_attrs)
       assert event.status == :draft
@@ -31,6 +40,7 @@ defmodule Crzz.EventsTest do
       assert event.start_date == ~D[2025-02-09]
       assert event.end_date == ~D[2025-02-09]
       assert event.start_time == ~T[14:00:00]
+      assert event.location_name == "Gulf of America"
     end
 
     test "create_event/1 with invalid data returns error changeset" do
