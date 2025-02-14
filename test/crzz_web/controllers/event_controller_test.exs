@@ -48,6 +48,86 @@ defmodule CrzzWeb.EventControllerTest do
     end
   end
 
+  describe "list_user_events" do
+    test "lists draft events only for manager", %{conn: conn, user: user} do
+      owner_event = event_fixture()
+      event_users_fixture(%{event: owner_event, role: :owner, user: user})
+      manager_event = event_fixture()
+      event_users_fixture(%{event: manager_event, role: :owner})
+      event_users_fixture(%{event: manager_event, role: :manager, user: user})
+
+      draft_following_event = event_fixture(%{status: :draft})
+      event_users_fixture(%{event: draft_following_event, user: user, role: :follower})
+      conn = get(conn, ~p"/api/my-events")
+
+      assert json_response(conn, 200)["data"] == [
+        %{
+          "id" => owner_event.id,
+          "description" => owner_event.description,
+          "title" => owner_event.title,
+          "start_date" => to_string(owner_event.start_date),
+          "end_date" => to_string(owner_event.end_date),
+          "location" => owner_event.location,
+          "location_name" => owner_event.location_name,
+          "start_time" => to_string(owner_event.start_time),
+          "status" => to_string(owner_event.status),
+          "type" => to_string(owner_event.type),
+          "role" => "owner",
+        },
+        %{
+          "id" => manager_event.id,
+          "description" => manager_event.description,
+          "title" => manager_event.title,
+          "start_date" => to_string(manager_event.start_date),
+          "end_date" => to_string(manager_event.end_date),
+          "location" => manager_event.location,
+          "location_name" => manager_event.location_name,
+          "start_time" => to_string(manager_event.start_time),
+          "status" => to_string(manager_event.status),
+          "type" => to_string(manager_event.type),
+          "role" => "manager",
+        }
+      ]
+    end
+    test "lists published events only as follower and participant", %{conn: conn, user: user} do
+      following_event = event_fixture(%{status: :published})
+      event_users_fixture(%{event: following_event, role: :follower, user: user})
+      participating_event = event_fixture(%{status: :private})
+      event_users_fixture(%{event: participating_event, role: :participant, user: user})
+
+      conn = get(conn, ~p"/api/my-events")
+
+      assert json_response(conn, 200)["data"] == [
+        %{
+          "id" => following_event.id,
+          "description" => following_event.description,
+          "title" => following_event.title,
+          "start_date" => to_string(following_event.start_date),
+          "end_date" => to_string(following_event.end_date),
+          "location" => following_event.location,
+          "location_name" => following_event.location_name,
+          "start_time" => to_string(following_event.start_time),
+          "status" => to_string(following_event.status),
+          "type" => to_string(following_event.type),
+          "role" => "follower",
+        },
+        %{
+          "id" => participating_event.id,
+          "description" => participating_event.description,
+          "title" => participating_event.title,
+          "start_date" => to_string(participating_event.start_date),
+          "end_date" => to_string(participating_event.end_date),
+          "location" => participating_event.location,
+          "location_name" => participating_event.location_name,
+          "start_time" => to_string(participating_event.start_time),
+          "status" => to_string(participating_event.status),
+          "type" => to_string(participating_event.type),
+          "role" => "participant",
+        }
+      ]
+    end
+  end
+
   describe "create event" do
     test "renders event when data is valid", %{conn: conn} do
       conn = post(conn, ~p"/api/events", event: @create_attrs)

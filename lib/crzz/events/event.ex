@@ -3,6 +3,7 @@ defmodule Crzz.Events.Event do
   import Ecto.Query
   import Ecto.Changeset
   alias Crzz.Events.Event
+  alias Crzz.Events.EventUsers
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
@@ -31,6 +32,30 @@ defmodule Crzz.Events.Event do
   Queries list all of public events with starting date from given date.
   """
   def upcoming_public_events_query(date) do
-    from e in Event, where: e.status == :published and e.start_date >= ^date
+    query = from e in Event, where: e.status == :published and e.start_date >= ^date
+
+    {:ok, query}
+  end
+
+  @doc """
+  Queries list of all events user has relation to.
+  """
+  def upcoming_events_for_user_query(user, date) do
+    participant_roles = [:participant, :follower]
+    manager_roles = [:owner, :manager]
+    published_or_private = [:published, :private]
+    query = from e in Event,
+      inner_join: eu in EventUsers,
+      on: eu.event_id == e.id,
+      select: {e, eu},
+      where:
+        e.start_date >= ^date and eu.user_id == ^user.id
+        and (
+          (e.status in ^published_or_private and eu.role in ^participant_roles)
+          or
+          (eu.role in ^manager_roles )
+        )
+
+    {:ok, query}
   end
 end

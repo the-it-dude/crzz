@@ -22,10 +22,25 @@ defmodule Crzz.Events do
   end
 
   @doc """
+  List Events for a user.
+
+      iex> list_upcoming_user_events(user)
+      [%Event{}, ...]
+
+  """
+  def list_upcoming_user_events(user) do
+    with {:ok, query} <- Event.upcoming_events_for_user_query(user, Date.utc_today()) do
+      Repo.all(query)
+    end
+  end
+
+  @doc """
   List upcoming published events.
   """
   def list_upcoming_public_events do
-    Repo.all(Event.upcoming_public_events_query(Date.utc_today()))
+    with {:ok, query} <- Event.upcoming_public_events_query(Date.utc_today()) do
+      Repo.all(query)
+    end
   end
 
   @doc """
@@ -60,6 +75,27 @@ defmodule Crzz.Events do
     %Event{}
     |> Event.changeset(attrs)
     |> Repo.insert()
+  end
+
+  @doc """
+  Creates event for a user.
+
+  ## Examples
+
+      iex> create_event_for_user(user, %{field: value})
+      {:ok, %Event{}}
+
+      iex> create_event_for_user(user, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+  """
+  def create_event_for_user(user, attrs \\ %{}) do
+    case create_event(attrs) do
+      {:ok, %Event{} = event} ->
+        add_user_to_event(user, event, :owner)
+        {:ok, event}
+      error ->
+        error
+    end
   end
 
   @doc """
@@ -110,6 +146,31 @@ defmodule Crzz.Events do
   end
 
   alias Crzz.Events.EventUsers
+
+  @doc """
+  Mark User as Event Owner.
+
+  Examples:
+
+      iex> add_user_to_event(user, event, role)
+      {:ok, %EventUsers{}}
+
+      iex> add_user_to_event(user, event, :incorrect_role)
+      {:error, %Ecto.Changeset{}}
+  """
+  def add_user_to_event(user, event, role) do
+    attrs = %{
+      user_id: user.id,
+      event_id: event.id,
+      role: role
+    }
+    %EventUsers{}
+    |> EventUsers.changeset(attrs)
+    |> Repo.insert(
+      conflict_target: [:user_id, :event_id],
+      on_conflict: [set: [role: role]]
+    )
+  end
 
   @doc """
   Returns the list of event_users.

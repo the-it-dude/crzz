@@ -11,8 +11,13 @@ defmodule CrzzWeb.EventController do
     render(conn, :index, events: events)
   end
 
+  def list_user_events(conn, _params) do
+    events_and_roles = Events.list_upcoming_user_events(conn.assigns[:current_user])
+    render(conn, :user_events, events: events_and_roles)
+  end
+
   def create(conn, %{"event" => event_params}) do
-    with {:ok, %Event{} = event} <- Events.create_event(event_params) do
+    with {:ok, %Event{} = event} <- Events.create_event_for_user(conn.assigns[:current_user], event_params) do
       conn
       |> put_status(:created)
       |> put_resp_header("location", ~p"/api/events/#{event}")

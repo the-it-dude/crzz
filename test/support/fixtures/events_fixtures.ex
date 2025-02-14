@@ -14,8 +14,8 @@ defmodule Crzz.EventsFixtures do
       attrs
       |> Enum.into(%{
         description: "some description",
-        end_date: ~D[2025-02-09],
-        start_date: ~D[2025-02-09],
+        end_date: Date.utc_today(),
+        start_date: Date.utc_today(),
         start_time: ~T[14:00:00],
         status: :draft,
         title: "some title",

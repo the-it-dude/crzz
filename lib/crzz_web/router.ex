@@ -33,6 +33,7 @@ defmodule CrzzWeb.Router do
     pipe_through [:api, :fetch_api_user]
 
     resources "/events", EventController, except: [:new, :edit]
+    get "/my-events", EventController, :list_user_events, as: :list_user_events
     resources "/event_users", EventUsersController, except: [:new, :edit]
   end
 
