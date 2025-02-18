@@ -2,6 +2,7 @@ defmodule CrzzWeb.EventControllerTest do
   use CrzzWeb.ConnCase, async: true
 
   alias Crzz.Accounts
+  alias Crzz.Accounts.User
   alias Crzz.Events.Event
 
   import Crzz.AccountsFixtures
@@ -58,7 +59,7 @@ defmodule CrzzWeb.EventControllerTest do
 
       draft_following_event = event_fixture(%{status: :draft})
       event_users_fixture(%{event: draft_following_event, user: user, role: :follower})
-      conn = get(conn, ~p"/api/my-events")
+      conn = get(conn, ~p"/api/events/my")
 
       assert json_response(conn, 200)["data"] == [
         %{
@@ -73,6 +74,8 @@ defmodule CrzzWeb.EventControllerTest do
           "status" => to_string(owner_event.status),
           "type" => to_string(owner_event.type),
           "role" => "owner",
+          "followers" => 0,
+          "participants" => 1,
         },
         %{
           "id" => manager_event.id,
@@ -86,6 +89,8 @@ defmodule CrzzWeb.EventControllerTest do
           "status" => to_string(manager_event.status),
           "type" => to_string(manager_event.type),
           "role" => "manager",
+          "followers" => 0,
+          "participants" => 2,
         }
       ]
     end
@@ -95,7 +100,7 @@ defmodule CrzzWeb.EventControllerTest do
       participating_event = event_fixture(%{status: :private})
       event_users_fixture(%{event: participating_event, role: :participant, user: user})
 
-      conn = get(conn, ~p"/api/my-events")
+      conn = get(conn, ~p"/api/events/my")
 
       assert json_response(conn, 200)["data"] == [
         %{
@@ -110,6 +115,8 @@ defmodule CrzzWeb.EventControllerTest do
           "status" => to_string(following_event.status),
           "type" => to_string(following_event.type),
           "role" => "follower",
+          "followers" => 1,
+          "participants" => 0,
         },
         %{
           "id" => participating_event.id,
@@ -123,6 +130,8 @@ defmodule CrzzWeb.EventControllerTest do
           "status" => to_string(participating_event.status),
           "type" => to_string(participating_event.type),
           "role" => "participant",
+          "followers" => 0,
+          "participants" => 1,
         }
       ]
     end
@@ -159,13 +168,14 @@ defmodule CrzzWeb.EventControllerTest do
   describe "update event" do
     setup [:create_event]
 
-    test "renders event when data is valid", %{conn: conn, event: %Event{id: id} = event} do
+    test "renders event when data is valid", %{conn: conn, event: %Event{id: id} = event, user: %User{} = user} do
+      event_users_fixture(%{event: event, role: :owner, user: user})
       conn = put(conn, ~p"/api/events/#{event}", event: @update_attrs)
       assert %{"id" => ^id} = json_response(conn, 200)["data"]
 
       conn = conn
         |> recycle()
-        |> assign(:current_user, user_fixture())
+        |> assign(:current_user, user)
       conn = get(conn, ~p"/api/events/#{id}")
 
       assert %{
@@ -180,7 +190,8 @@ defmodule CrzzWeb.EventControllerTest do
              } = json_response(conn, 200)["data"]
     end
 
-    test "renders errors when data is invalid", %{conn: conn, event: event} do
+    test "renders errors when data is invalid", %{conn: conn, event: %Event{} = event, user: %User{} = user} do
+      event_users_fixture(%{event: event, role: :owner, user: user})
       conn = put(conn, ~p"/api/events/#{event}", event: @invalid_attrs)
       assert json_response(conn, 422)["errors"] != %{}
     end
@@ -189,7 +200,8 @@ defmodule CrzzWeb.EventControllerTest do
   describe "delete event" do
     setup [:create_event]
 
-    test "deletes chosen event", %{conn: conn, event: event} do
+    test "deletes chosen event", %{conn: conn, event: event, user: user} do
+      event_users_fixture(%{event: event, role: :owner, user: user})
       conn = delete(conn, ~p"/api/events/#{event}")
       assert response(conn, 204)
     end

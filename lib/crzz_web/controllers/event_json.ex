@@ -19,8 +19,8 @@ defmodule CrzzWeb.EventJSON do
   @doc """
   Renders a single event.
   """
-  def show(%{event: event}) do
-    %{data: data(event)}
+  def show(%{event: event_and_role}) do
+    %{data: event_and_role_data(event_and_role)}
   end
 
   defp data(%Event{} = event) do
@@ -39,18 +39,21 @@ defmodule CrzzWeb.EventJSON do
   end
 
   defp event_and_role_data({%Event{} = event, %EventUsers{} = user_role}) do
-    %{
-      id: event.id,
-      title: event.title,
-      status: event.status,
-      type: event.type,
-      description: event.description,
-      start_date: event.start_date,
-      end_date: event.end_date,
-      start_time: event.start_time,
-      location: event.location,
-      location_name: event.location_name,
-      role: user_role.role,
-    }
+    event_data = data(event)
+    Map.put(event_data, :role, user_role.role)
   end
+
+  defp event_and_role_data({%Event{} = event, user_role, follower_count, participant_count}) do
+    event_data = data(event)
+    |> Map.put(:role, nil)
+    |> Map.put(:followers, follower_count)
+    |> Map.put(:participants, participant_count)
+
+    if user_role == nil do
+      event_data
+    else
+      Map.put(event_data, :role, user_role.role)
+    end
+  end
+
 end

@@ -5,6 +5,7 @@ defmodule Crzz.EventsTest do
 
   describe "events" do
     alias Crzz.Events.Event
+    alias Crzz.Events.EventUsers
 
     import Crzz.AccountsFixtures
     import Crzz.EventsFixtures
@@ -25,7 +26,10 @@ defmodule Crzz.EventsTest do
       second_user = user_fixture()
       event_users_fixture(%{user: second_user, role: :owner})
 
-      [{first_event, first_role}, {second_event, second_role}] = Events.list_upcoming_user_events(user)
+      [
+        {first_event, first_role, 0, 1},
+        {second_event, second_role, 0, 1},
+      ] = Events.list_upcoming_user_events(user)
 
       assert first_event.id == owner_event.event_id
       assert first_role == owner_event
@@ -45,7 +49,19 @@ defmodule Crzz.EventsTest do
       event_users_fixture(%{user: user, role: :follower, event: not_published_event})
       event_fixture(%{status: :private})
 
-      assert [{first_event, first_role}, {second_event, second_role}] == Events.list_upcoming_user_events(user)
+      assert [
+        {
+          first_event,
+          first_role,
+          1,
+          0
+        },
+        {
+          second_event,
+          second_role,
+          0,
+          1
+        }] == Events.list_upcoming_user_events(user)
     end
 
     test "get_event!/1 returns the event with given id" do
@@ -89,7 +105,7 @@ defmodule Crzz.EventsTest do
       }
       user = user_fixture()
 
-      assert {:ok, %Event{} = event} = Events.create_event_for_user(user, valid_attrs)
+      assert {:ok, %Event{} = event, %EventUsers{} = event_user} = Events.create_event_for_user(user, valid_attrs)
       assert event.status == :draft
       assert event.type == :cars_and_coffee
       assert event.description == "some description"
@@ -99,7 +115,6 @@ defmodule Crzz.EventsTest do
       assert event.start_time == ~T[14:00:00]
       assert event.location_name == "Gulf of America"
 
-      [event_user] = Events.list_event_users()
       assert event_user.user_id == user.id
       assert event_user.event_id == event.id
       assert event_user.role == :owner

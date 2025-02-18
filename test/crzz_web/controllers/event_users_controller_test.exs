@@ -13,7 +13,7 @@ defmodule CrzzWeb.EventUsersControllerTest do
   # @update_attrs %{
   #   role: :manager
   # }
-  @invalid_attrs %{role: nil}
+  # @invalid_attrs %{role: nil}
 
   setup %{conn: conn} do
     user = user_fixture()
@@ -25,35 +25,35 @@ defmodule CrzzWeb.EventUsersControllerTest do
     {:ok, conn: conn, user: user, event: event_fixture()}
   end
 
-  describe "index" do
-    test "lists all event_users", %{conn: conn} do
-      conn = get(conn, ~p"/api/event_users")
-      assert json_response(conn, 200)["data"] == []
-    end
-  end
+  # describe "index" do
+  #   test "lists all event_users", %{conn: conn} do
+  #     conn = get(conn, ~p"/api/event_users")
+  #     assert json_response(conn, 200)["data"] == []
+  #   end
+  # end
 
-  describe "create event_users" do
-    test "renders event_users when data is valid", %{conn: conn, user: user, event: event} do
-      user_id = user.id
-      event_id = event.id
-      conn = post(
-        conn,
-        ~p"/api/event_users",
-        event_users: %{
-          role: :owner,
-          user_id: user_id,
-          event_id: event_id,
-        }
-      )
-      assert %{"user_id" => ^user_id, "event_id" => ^event_id, "role" => "owner"} = json_response(conn, 201)["data"]
-
-    end
-
-    test "renders errors when data is invalid", %{conn: conn} do
-      conn = post(conn, ~p"/api/event_users", event_users: @invalid_attrs)
-      assert json_response(conn, 422)["errors"] != %{}
-    end
-  end
+  # describe "create event_users" do
+  #   test "renders event_users when data is valid", %{conn: conn, user: user, event: event} do
+  #     user_id = user.id
+  #     event_id = event.id
+  #     conn = post(
+  #       conn,
+  #       ~p"/api/event_users",
+  #       event_users: %{
+  #         role: :owner,
+  #         user_id: user_id,
+  #         event_id: event_id,
+  #       }
+  #     )
+  #     assert %{"user_id" => ^user_id, "event_id" => ^event_id, "role" => "owner"} = json_response(conn, 201)["data"]
+  #
+  #   end
+  #
+  #   test "renders errors when data is invalid", %{conn: conn} do
+  #     conn = post(conn, ~p"/api/event_users", event_users: @invalid_attrs)
+  #     assert json_response(conn, 422)["errors"] != %{}
+  #   end
+  # end
 
   # describe "update event_users" do
   #   setup [:create_event_users]

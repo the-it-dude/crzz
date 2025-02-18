@@ -31,8 +31,25 @@ defmodule Crzz.Events.Event do
   @doc """
   Queries list all of public events with starting date from given date.
   """
-  def upcoming_public_events_query(date) do
-    query = from e in Event, where: e.status == :published and e.start_date >= ^date
+  def upcoming_public_events_query(user, date) do
+    query = from e in Event,
+      left_join: eu in EventUsers,
+      on: eu.event_id == e.id and eu.user_id == ^user.id,
+      select: {
+        e,
+        eu,
+        fragment(
+          "(SELECT COUNT(0) FROM event_users
+            WHERE event_users.event_id = ? and event_users.role = 'follower')",
+          e.id),
+        fragment(
+          "(SELECT COUNT(0) FROM event_users
+            WHERE event_users.event_id = ? and event_users.role in ('participant', 'manager', 'owner'))",
+          e.id),
+      },
+      where:
+        e.status == :published
+        and e.start_date >= ^date
 
     {:ok, query}
   end
@@ -47,13 +64,24 @@ defmodule Crzz.Events.Event do
     query = from e in Event,
       inner_join: eu in EventUsers,
       on: eu.event_id == e.id,
-      select: {e, eu},
+      select: {
+        e,
+        eu,
+        fragment(
+          "(SELECT COUNT(0) FROM event_users
+            WHERE event_users.event_id = ? and event_users.role = 'follower')",
+          e.id),
+        fragment(
+          "(SELECT COUNT(0) FROM event_users
+            WHERE event_users.event_id = ? and event_users.role in ('participant', 'manager', 'owner'))",
+          e.id),
+      },
       where:
         e.start_date >= ^date and eu.user_id == ^user.id
         and (
           (e.status in ^published_or_private and eu.role in ^participant_roles)
           or
-          (eu.role in ^manager_roles )
+          eu.role in ^manager_roles
         )
 
     {:ok, query}

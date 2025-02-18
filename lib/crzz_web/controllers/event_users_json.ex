@@ -15,6 +15,13 @@ defmodule CrzzWeb.EventUsersJSON do
     %{data: data(event_users)}
    end
 
+  @doc """
+  Renders error in update.
+  """
+  def role_error(%{error_message: error_message}) do
+    %{error: error_message}
+  end
+
   defp data(%EventUsers{} = event_users) do
     %{
       user_id: event_users.user_id,

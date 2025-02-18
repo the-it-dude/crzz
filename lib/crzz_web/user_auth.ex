@@ -5,6 +5,7 @@ defmodule CrzzWeb.UserAuth do
   import Phoenix.Controller
 
   alias Crzz.Accounts
+  alias Crzz.Events
 
   # Make the remember me cookie valid for 60 days.
   # If you want bump or reduce this value, also change
@@ -241,4 +242,22 @@ defmodule CrzzWeb.UserAuth do
   defp maybe_store_return_to(conn), do: conn
 
   defp signed_in_path(_conn), do: ~p"/"
+
+  ### Event Users
+  def user_can_manage_event(%Plug.Conn{params: %{"id" => event_id}} = conn, _opts) do
+    if user_has_manager_role_for_event(conn.assigns[:current_user].id, event_id) do
+      conn
+    else
+      conn
+      |> put_resp_content_type("application/json")
+      |> send_resp(:unauthorized, Jason.encode!(
+            %{"error" => "Unauthorized."}
+        ))
+      |> halt()
+    end
+  end
+
+  def user_has_manager_role_for_event(user_id, event_id) do
+    Events.get_user_role_for_event(user_id, event_id) in [:manager, :owner]
+  end
 end

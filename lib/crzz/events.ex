@@ -7,6 +7,7 @@ defmodule Crzz.Events do
   alias Crzz.Repo
 
   alias Crzz.Events.Event
+  alias Crzz.Events.EventUsers
 
   @doc """
   Returns the list of events.
@@ -37,8 +38,8 @@ defmodule Crzz.Events do
   @doc """
   List upcoming published events.
   """
-  def list_upcoming_public_events do
-    with {:ok, query} <- Event.upcoming_public_events_query(Date.utc_today()) do
+  def list_upcoming_public_events(user) do
+    with {:ok, query} <- Event.upcoming_public_events_query(user, Date.utc_today()) do
       Repo.all(query)
     end
   end
@@ -58,6 +59,27 @@ defmodule Crzz.Events do
 
   """
   def get_event!(id), do: Repo.get!(Event, id)
+
+  def get_event_for_user!(id, user) do
+    participant_roles = [:participant, :follower]
+    manager_roles = [:owner, :manager]
+    Repo.one!(
+      from e in Event,
+      left_join: eu in EventUsers,
+      on: eu.event_id == e.id and eu.user_id ==  ^user.id,
+      select: {e, eu},
+      where:
+        e.id == ^id
+        and
+        (
+          e.status == :published
+          or
+          (e.status == :private and eu.role in ^participant_roles)
+          or
+          eu.role in ^manager_roles
+        )
+    )
+  end
 
   @doc """
   Creates a event.
@@ -91,8 +113,8 @@ defmodule Crzz.Events do
   def create_event_for_user(user, attrs \\ %{}) do
     case create_event(attrs) do
       {:ok, %Event{} = event} ->
-        add_user_to_event(user, event, :owner)
-        {:ok, event}
+        {:ok, %EventUsers{} = event_users} = add_user_to_event(user, event, :owner)
+        {:ok, event, event_users}
       error ->
         error
     end
@@ -129,6 +151,7 @@ defmodule Crzz.Events do
 
   """
   def delete_event(%Event{} = event) do
+    delete_event_users(event.id)
     Repo.delete(event)
   end
 
@@ -207,6 +230,40 @@ defmodule Crzz.Events do
       )
 
   @doc """
+  Gets a single event_users.
+
+  ## Examples
+
+      iex> get_event_user(user_id, event_id)
+      %EventUsers{}
+
+      iex> get_user_event_role(user_id, event_user_has_no_access_to)
+      nil
+  """
+  def get_event_users(event_id, user_id), do: Repo.one(
+        from eu in EventUsers,
+        where: eu.event_id == ^event_id and eu.user_id == ^user_id
+      )
+
+  @doc """
+  Get User role for given event.
+
+  # Examples
+
+    iex> get_user_role_for_event(33, 55)
+    :owner
+
+    iex> get_user_role_for_event(33, no_access_id)
+    :unknown
+  """
+  def get_user_role_for_event(user_id, event_id) do
+    case get_event_users(event_id, user_id) do
+      %EventUsers{} = event_user -> event_user.role
+      _ -> :unknown
+    end
+  end
+
+  @doc """
   Creates a event_users.
 
   ## Examples
@@ -236,10 +293,17 @@ defmodule Crzz.Events do
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_event_users(%EventUsers{} = event_users, attrs) do
-    event_users
-    |> EventUsers.changeset(attrs)
-    |> Repo.update()
+  def update_event_users(event_id, user_id, role) do
+    %EventUsers{}
+    |> EventUsers.changeset(%{
+          user_id: user_id,
+          event_id: event_id,
+          role: role
+    })
+    |> Repo.insert(
+      on_conflict: [set: [role: role]],
+      conflict_target: [:event_id, :user_id]
+    )
   end
 
   @doc """
@@ -254,8 +318,16 @@ defmodule Crzz.Events do
       {:error, %Ecto.Changeset{}}
 
   """
-  def delete_event_users(%EventUsers{} = event_users) do
-    Repo.delete(event_users)
+  def delete_event_users(event_id) do
+    Repo.delete_all(from eu in EventUsers, where: eu.event_id == ^event_id)
+  end
+
+
+  @doc """
+  Delete relation between event and user.
+  """
+  def delete_event_users(event_id, user_id) do
+    Repo.delete_all(from eu in EventUsers, where: eu.event_id == ^event_id and eu.user_id == ^user_id)
   end
 
   @doc """
@@ -270,4 +342,4 @@ defmodule Crzz.Events do
   def change_event_users(%EventUsers{} = event_users, attrs \\ %{}) do
     EventUsers.changeset(event_users, attrs)
   end
-end
+ end
